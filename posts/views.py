@@ -15,13 +15,10 @@ def create(request):
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             form.save(user = request.user)
-        return redirect('posts:main')
-
-        # title = request.POST.get('title')
-        # writer = request.user
-        # content = request.POST.get('content')
-        # image = request.FILES.get('image')
-        # Post.objects.create(title=title, content=content, image=image, writer=writer)
+            return redirect('home')
+    else:
+        form = PostForm()
+        return render(request, 'posts/post_form.html', {'form': form})
 
 def main(request):
     posts = Post.objects.all()
@@ -36,15 +33,15 @@ def show(request, id):
     all_comments = post.comments.all().order_by('-created_at')
     return render(request, 'posts/show.html', {'post': post, 'comments': all_comments})
 
-def update(request,id):
-    post = get_object_or_404(Post,pk=id)
+def update(request, id):
+    post = get_object_or_404(Post,pk = id)
+    form = PostForm(instance=post)
     if request.method == "POST":
-        post.title = request.POST['title']
-        post.content = request.POST['content']
-        post.image = request.FILES.get('image')
-        post.save()
-        return redirect('main')
-    return render(request,'posts/update.html',{'post':post})
+        form = PostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save(user = request.user)
+        return redirect('home')
+    return render(request, 'posts/post_form.html', {'form': form})
 
 
 def delete(request, id): 
